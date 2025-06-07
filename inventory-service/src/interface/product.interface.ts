@@ -1,0 +1,23 @@
+export interface Product {
+  id: string;
+  productId: string;
+  name: string;
+  description?: string;
+  price: number;
+  quantity: number;
+  category?: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ProductCreatedEvent {
+  productId: string;
+  name: string;
+  description?: string;
+  price: number;
+  quantity: number;
+  category?: string;
+  createdBy: string;
+  createdAt: string;
+}
