@@ -15,6 +15,7 @@ model Product {
   price       Float
   quantity    Int
   category    String?
+  images      String[] @default([])
   createdBy   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

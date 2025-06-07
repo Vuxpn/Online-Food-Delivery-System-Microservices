@@ -1,10 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsString,
   IsNumber,
   IsOptional,
   Min,
+  IsArray,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -32,6 +34,10 @@ export class CreateProductDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
+  @Transform(({ value }) => {
+    return typeof value === 'string' ? parseFloat(value) : value;
+  })
   price: number;
 
   @ApiProperty({
@@ -41,6 +47,10 @@ export class CreateProductDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
+  @Transform(({ value }) => {
+    return typeof value === 'string' ? parseInt(value, 10) : value;
+  })
   quantity: number;
 
   @ApiProperty({
@@ -51,6 +61,17 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   category?: string;
+
+  @ApiProperty({
+    description: 'Product images URLs',
+    example: ['https://res.cloudinary.com/.../image1.jpg'],
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
 }
 
 export class UpdateProductDto {
@@ -80,6 +101,11 @@ export class UpdateProductDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    return typeof value === 'string' ? parseFloat(value) : value;
+  })
   price?: number;
 
   @ApiProperty({
@@ -90,6 +116,11 @@ export class UpdateProductDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    return typeof value === 'string' ? parseInt(value, 10) : value;
+  })
   quantity?: number;
 
   @ApiProperty({
@@ -100,4 +131,15 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString()
   category?: string;
+
+  @ApiProperty({
+    description: 'Product images URLs',
+    example: ['https://res.cloudinary.com/.../image1.jpg'],
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
 }

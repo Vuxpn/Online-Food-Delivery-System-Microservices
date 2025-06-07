@@ -3,25 +3,35 @@ import { ClientKafka } from '@nestjs/microservices';
 import { CreateProductDto, UpdateProductDto } from 'src/dto/product.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { lastValueFrom } from 'rxjs';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProductService {
   constructor(
     @Inject('AUTH_SERVICE') private readonly kafkaClient: ClientKafka,
+    private readonly cloudinaryService: CloudinaryService,
   ) {
+    this.kafkaClient.subscribeToResponseOf('get.allproducts');
     this.kafkaClient.subscribeToResponseOf('get.productsbyuser');
     this.kafkaClient.subscribeToResponseOf('get.productbyid');
-    this.kafkaClient.subscribeToResponseOf('get.allproducts');
   }
 
   async createProduct(
     createProductDto: CreateProductDto & { createdBy: string },
+    files?: Express.Multer.File[],
   ) {
     try {
       const productId = uuidv4();
+      let imageUrls: string[] = [];
+
+      if (files && files.length > 0) {
+        imageUrls = await this.cloudinaryService.uploadMultipleFiles(files);
+      }
+
       const productData = {
         productId,
         ...createProductDto,
+        images: imageUrls,
         createdAt: new Date().toISOString(),
       };
 
@@ -35,7 +45,10 @@ export class ProductService {
         ...productData,
       };
     } catch (error) {
-      throw new Error('Cannot create product');
+      throw new HttpException(
+        'Failed to create product',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -75,10 +88,10 @@ export class ProductService {
     }
   }
 
-  async getProductById(productId: string) {
+  async getProductById(id: string) {
     try {
       const response = await lastValueFrom(
-        this.kafkaClient.send('get.productbyid', { productId }),
+        this.kafkaClient.send('get.productbyid', { id }),
       ).catch(() => null);
 
       if (!response) {
@@ -98,15 +111,23 @@ export class ProductService {
   }
 
   async updateProduct(
-    productId: string,
+    id: string,
     updateProductDto: UpdateProductDto,
     userId: string,
+    files?: Express.Multer.File[],
   ) {
     try {
+      let imageUrls: string[] = [];
+
+      if (files && files.length > 0) {
+        imageUrls = await this.cloudinaryService.uploadMultipleFiles(files);
+      }
+
       const updateData = {
-        productId,
+        id,
         userId,
         ...updateProductDto,
+        ...(imageUrls.length > 0 && { images: imageUrls }),
         updatedAt: new Date().toISOString(),
       };
 
@@ -117,31 +138,33 @@ export class ProductService {
 
       return {
         message: 'Product updated successfully',
-        productId,
-        updatedFields: updateProductDto,
+        id,
+        updatedFields: updateData,
       };
     } catch (error) {
       throw new HttpException(
-        'Cannot update product',
+        'Failed to update product',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  async deleteProduct(productId: string, userId: string) {
+  async deleteProduct(id: string, userId: string) {
     try {
+      const deleteData = {
+        id,
+        userId,
+        deletedAt: new Date().toISOString(),
+      };
+
       this.kafkaClient.emit('product.deleted', {
         key: userId,
-        value: {
-          productId,
-          userId,
-          deletedAt: new Date().toISOString(),
-        },
+        value: deleteData,
       });
 
       return {
         message: 'Product deleted successfully',
-        productId,
+        id,
       };
     } catch (error) {
       throw new HttpException(

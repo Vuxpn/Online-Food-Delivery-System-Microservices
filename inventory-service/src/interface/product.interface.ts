@@ -6,6 +6,7 @@ export interface Product {
   price: number;
   quantity: number;
   category?: string;
+  images?: string[];
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
@@ -18,6 +19,7 @@ export interface ProductCreatedEvent {
   price: number;
   quantity: number;
   category?: string;
+  images?: string[];
   createdBy: string;
   createdAt: string;
 }

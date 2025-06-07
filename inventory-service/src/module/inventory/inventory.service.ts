@@ -16,6 +16,7 @@ export class InventoryService {
           price: productData.price,
           quantity: productData.quantity,
           category: productData.category,
+          images: productData.images || [],
           createdBy: productData.createdBy,
           createdAt: new Date(productData.createdAt),
         },
@@ -31,27 +32,32 @@ export class InventoryService {
 
   async updateProduct(updateData: any) {
     try {
-      const { id, userId, ...updateFields } = updateData;
+      const { id, userId, ...dataToUpdate } = updateData;
 
       const existingProduct = await this.prisma.product.findFirst({
         where: { id, createdBy: userId },
       });
 
       if (!existingProduct) {
-        throw new Error(
-          'Product not found or you do not have permission to update',
-        );
+        throw new Error('Product not found or unauthorized');
       }
+
+      const updateFields: any = {};
+      if (dataToUpdate.name) updateFields.name = dataToUpdate.name;
+      if (dataToUpdate.description)
+        updateFields.description = dataToUpdate.description;
+      if (dataToUpdate.price) updateFields.price = dataToUpdate.price;
+      if (dataToUpdate.quantity) updateFields.quantity = dataToUpdate.quantity;
+      if (dataToUpdate.category) updateFields.category = dataToUpdate.category;
+      if (dataToUpdate.images) updateFields.images = dataToUpdate.images;
+      updateFields.updatedAt = new Date();
 
       const updatedProduct = await this.prisma.product.update({
         where: { id },
-        data: {
-          ...updateFields,
-          updatedAt: new Date(),
-        },
+        data: updateFields,
       });
 
-      console.log(`Product ${id} updated successfully`);
+      console.log('Product updated:', updatedProduct);
       return updatedProduct;
     } catch (error) {
       console.error('Error updating product:', error);
@@ -147,21 +153,21 @@ export class InventoryService {
   }
 
   async getProducts() {
-    return await this.prisma.product.findMany({
+    return this.prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async getProductsByUser(userId: string) {
-    return await this.prisma.product.findMany({
+    return this.prisma.product.findMany({
       where: { createdBy: userId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async getProductById(productId: string) {
-    return await this.prisma.product.findUnique({
-      where: { id: productId },
+  async getProductById(id: string) {
+    return this.prisma.product.findUnique({
+      where: { id },
     });
   }
 }

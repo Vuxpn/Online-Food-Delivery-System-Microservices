@@ -5,6 +5,7 @@ import {
   Payload,
   Ctx,
   KafkaContext,
+  KafkaRetriableException,
 } from '@nestjs/microservices';
 import { InventoryService } from './inventory.service';
 import { ProductCreatedEvent } from '../../interface/product.interface';
@@ -18,8 +19,13 @@ export class InventoryController {
     @Payload() message: any,
     @Ctx() context: KafkaContext,
   ) {
-    console.log('Received product.created event:', message);
-    return await this.inventoryService.createProduct(message);
+    try {
+      console.log('Received product.created event:', message);
+      return await this.inventoryService.createProduct(message);
+    } catch (error) {
+      console.error('Failed to create product:', error.message);
+      return { status: 'fail', message: error.message };
+    }
   }
 
   @EventPattern('product.updated')
@@ -27,8 +33,13 @@ export class InventoryController {
     @Payload() message: any,
     @Ctx() context: KafkaContext,
   ) {
-    console.log('Received product.updated event:', message);
-    return await this.inventoryService.updateProduct(message);
+    try {
+      console.log('Received product.updated event:', message);
+      return await this.inventoryService.updateProduct(message);
+    } catch (error) {
+      console.error('Failed to update product:', error.message);
+      return { status: 'fail', message: error.message };
+    }
   }
 
   @EventPattern('product.deleted')
@@ -52,7 +63,7 @@ export class InventoryController {
 
   @MessagePattern('get.productbyid')
   async getProductById(@Payload() message: any) {
-    return await this.inventoryService.getProductById(message.productId);
+    return await this.inventoryService.getProductById(message.id);
   }
 
   @EventPattern('order.delivered')
