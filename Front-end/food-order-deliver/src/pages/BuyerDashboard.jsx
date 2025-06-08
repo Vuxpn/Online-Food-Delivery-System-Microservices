@@ -286,6 +286,7 @@ const BuyerDashboard = () => {
                 loading={loading}
                 onAddToCart={addToCart}
                 formatPrice={formatPrice}
+                isSellerMode={false}
             />
         </div>
     );
