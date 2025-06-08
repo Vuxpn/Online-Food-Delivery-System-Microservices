@@ -10,6 +10,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { OrderModule } from './module/order/order.module';
 import { ProductModule } from './module/product/product.module';
 import { RolesGuard } from './guard/roles.guard';
+import { WebSocketModule } from './module/websocket/websocket.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RolesGuard } from './guard/roles.guard';
     AuthModule,
     OrderModule,
     ProductModule,
+    WebSocketModule,
   ],
   controllers: [AppController],
   providers: [

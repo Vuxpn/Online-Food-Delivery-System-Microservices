@@ -107,7 +107,7 @@ const LoginForm = () => {
                 <button
                     type="submit"
                     disabled={loading || !formData.username || !formData.password}
-                    className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white font-semibold py-2.5 px-4 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
+                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold py-2.5 px-4 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg text-sm"
                 >
                     {loading ? (
                         <div className="flex items-center justify-center">

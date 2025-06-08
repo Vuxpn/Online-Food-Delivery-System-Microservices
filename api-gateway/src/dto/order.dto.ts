@@ -46,6 +46,7 @@ export class CreateOrderDto {
     description: 'The ID of the user',
     example: 'vu',
   })
+  @IsOptional()
   @IsString()
   userId: string;
 

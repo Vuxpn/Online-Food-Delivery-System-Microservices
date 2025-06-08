@@ -53,4 +53,22 @@ export class OrderController {
       message.userId,
     );
   }
+
+  // @MessagePattern('get.seller.orders')
+  // async getSellerOrders(@Payload() message: any) {
+  //   console.log('Received get.seller.orders request:', message);
+  //   return await this.orderService.getOrdersBySeller(message.sellerId);
+  // }
+
+  @EventPattern('order.status_updated')
+  async handleOrderStatusUpdated(
+    @Payload() message: any,
+    @Ctx() context: KafkaContext,
+  ) {
+    console.log('Received order.status.updated event:', message);
+    return await this.orderService.updateOrderStatus(
+      message.orderId,
+      message.status,
+    );
+  }
 }

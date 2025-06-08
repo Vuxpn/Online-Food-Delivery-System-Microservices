@@ -8,3 +8,19 @@ a {
     text-decoration: none;
     color: inherit;
 }
+.search-animate {
+    animation: searchPulse 2s infinite;
+}
+
+@keyframes searchPulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+.order-timeline {
+    position: relative;
+}

@@ -212,4 +212,15 @@ export class OrderService {
       throw error;
     }
   }
+
+  // async getOrdersBySeller(sellerId: string) {
+  //   try {
+  //     const orders = await this.prisma.order.findMany({
+  //       where: { items: { some: { sellerId } } },
+  //     });
+  //   } catch (error) {
+  //     console.error(`Error getting orders for seller ${sellerId}:`, error);
+  //     throw error;
+  //   }
+  // }
 }

@@ -11,6 +11,7 @@ export class OrderService {
   ) {
     this.kafkaClient.subscribeToResponseOf('get.orderhistory');
     this.kafkaClient.subscribeToResponseOf('get.orderbyid');
+    this.kafkaClient.subscribeToResponseOf('get.sellerorders');
   }
 
   async createOrder(createOrderDto: CreateOrderDto) {
@@ -99,6 +100,45 @@ export class OrderService {
         error.message || 'Cannot get order details',
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+  async getSellerOrders(sellerId: string) {
+    try {
+      const response = await lastValueFrom(
+        this.kafkaClient.send('get.sellerorders', { sellerId }),
+      ).catch(() => []);
+
+      return {
+        message: 'Seller orders retrieved successfully',
+        orders: response || [],
+      };
+    } catch (error) {
+      throw new Error('Cannot get seller orders');
+    }
+  }
+
+  async updateOrderStatus(orderId: string, sellerId: string, status: string) {
+    try {
+      const statusData = {
+        orderId,
+        sellerId,
+        status,
+        updatedAt: new Date(),
+      };
+
+      this.kafkaClient.emit('order.status_updated', {
+        key: sellerId,
+        value: statusData,
+      });
+
+      return {
+        message: 'Order status updated successfully',
+        orderId,
+        status,
+        updatedAt: statusData.updatedAt,
+      };
+    } catch (error) {
+      throw new Error('Cannot update order status');
     }
   }
 }
